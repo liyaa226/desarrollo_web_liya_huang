@@ -1,0 +1,20 @@
+
+h1 {
+    text-align: center;
+    font-family: Arial;
+}
+
+ul {
+    text-align: center;
+    list-style-position: inside;
+    font-size: 20px;
+    font-family: Arial;
+}
+
+body {
+    font-size: 16px;
+    font-family: Arial;
+    background-color: #f4f4f4;
+    margin: 30;
+    height: 100vh;
+}
