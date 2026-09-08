@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Avistamientos de Aves</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <main class="main-containe">
+        <h1>Avistamientos de Aves</h1>
+
+        <section class="filtros">
+            <div>
+                <label for="filtroAve">Tipo de ave:</label>
+                <select id="filtroAve">
+                    <option value="todas">Todas</option>
+                    <option value="Bosque_Sur">Aves de Bosque y Zona Sur</option>
+                    <option value="Rapaces_Montaña">Aves Rapaces y de Alta Montaña</option>
+                    <option value="Costas_Marinas">Aves de Humedales, Costas y Zonas Marinas</option>
+                    <option value="Urbanas_Comunes">Aves Urbanas y Comunes</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="orden">Ordenar por:</label>
+                <select id="orden">
+                    <option value="fecha-desc">Fecha: más reciente</option>
+                    <option value="fecha-asc">Fecha: más antigua</option>
+                    <option value="lugar-asc">Lugar: A-Z</option>
+                    <option value="lugar-desc">Lugar: Z-A</option>
+                </select>
+            </div>
+        </section>
+
+        <table id="tablaAvistamientos">
+            <thead>
+                <tr>
+                    <th data-sort="ave">Ave</th>
+                    <th data-sort="fecha">Fecha</th>
+                    <th data-sort="lugar">Lugar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="4"><i>Loading...</i></td></tr>
+            </tbody>
+        </table>
+
+        <button id="prevButton">Anterior</button> 
+        <button id="nextButton">Siguiente</button> 
+
+    </main>
+
+    <script src="listado_avistamientos.js"></script>
+</body>
+</html>
+
+
