@@ -12,14 +12,15 @@
         </div>
         <h1>Registro de voluntario(a)</h1>
         <form name="myForm" method="post" enctype="multipart/form-data">
+            
             <label for="nombre">Nombre</label>
-            <input type="nombre" name="nombre" id="nombre" minlength="4" required><br>
+            <input type="nombre" name="nombre" id="nombre" minlength="4" placeholder="Escribe tu nombre" required><br>
 
             <label for="email">Email</label>
-            <input type="email" name="email" id="email" minlength="10" required><br>
+            <input type="email" name="email" id="email" minlength="10" placeholder="ejemplo@correo.cl" required><br>
 
             <label for="phone">Phone</label>
-            <input type="text" name="phone" id="phone" minlength="8" required><br>
+            <input type="text" name="phone" id="phone" minlength="9" placeholder="123456789"><br>
             
             <label for="select-region">Región</label>
             <select name="select-region" id="select-region" required>
@@ -31,7 +32,8 @@
                 <option value="">Seleccione una comuna</option>
             </select><br>
 
-            <button id="submit-btn" type="button">Enviar</button>
+            <button id="submit-btn" type="button">Registrarse</button>
+            
         </form>
     </div>
     <script src="../js/select.js"></script>

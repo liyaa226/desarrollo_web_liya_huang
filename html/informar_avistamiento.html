@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Informar avistamientos</title>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <div id="val-box" hidden>
+            <h2 id="val-msg"></h2>
+            <ul id="val-list"></ul>
+        </div>
+        <h1>Informar avistamientos</h1>
+        <form name="myFormAvistamientos" method="post" enctype="multipart/form-data">
+            <label for="tipo">Tipo de ave</label>
+            <select id="tipo" name="tipo">
+                <option value="">--Seleccione un tipo de ave--</option>
+                <option value="Bosque_Sur">Aves de Bosque y Zona Sur</option>
+                <option value="Rapaces_Montaña">Aves Rapaces y de Alta Montaña</option>
+                <option value="Costas_Marinas">Aves de Humedales, Costas y Zonas Marinas</option>
+                <option value="Urbanas_Comunes">Aves Urbanas y Comunes</option>
+            </select>
+    
+            <label for="nombre_ave">Nombre del ave</label>
+            <input type="nombre_ave" name="nombre_ave" id="nombre_ave" minlength="5"><br>
+            <br>
+            <label for="lugar">Lugar del avistamiento</label>
+            <input type="text" name="lugar" id="lugar" minlength="8" required><br>
+            
+            <label for="fecha">Fecha del avistamiento</label>
+            <input type="date" name="fecha" id="fecha" required><br>
+            <br>
+            <label for="hora">Hora del avistamiento</label>
+            <input type="time" id="hora" name="hora"><br>
+            <br>
+            <label for="archivo">Adjuntar archivo:</label>
+            <input type="file" id="archivo" name="archivo" required><br>
+
+            <button id="submit-btn" type="button">Enviar</button>
+        </form>
+    </div>
+    <script src="../js/validation_avistamientos.js"></script>
+</body>
+</html>
