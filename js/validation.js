@@ -32,7 +32,6 @@ const validatePhoneNumber = (phoneNumber) => {
   return lengthValid && formatValid;
 };
 
-
 const validateSelect = (select) => {
   if(!select) return false;
   return true
@@ -64,7 +63,7 @@ const validateForm = () => {
   }
   if (!validatePhoneNumber(phoneNumber)) {
     setInvalidInput("Número");
-  }
+  }  
 
   if (!validateSelect(region)) {
     setInvalidInput("Region");
@@ -72,7 +71,6 @@ const validateForm = () => {
   if (!validateSelect(comuna)) {
     setInvalidInput("Comuna");
   }
-
   // finalmente mostrar la validación
   let validationBox = document.getElementById("val-box");
   let validationMessageElem = document.getElementById("val-msg");
