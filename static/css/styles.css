@@ -107,3 +107,9 @@ label:has(+ input:required)::after {
   font-weight: bold;
 }
 
+label:has(+ select:required)::after {
+  content: " *";
+  color: red;
+  font-weight: bold;
+}
+

@@ -4,6 +4,11 @@ h1 {
     font-family: Arial;
 }
 
+h2 {
+    text-align: center;
+    font-family: Arial;
+}
+
 ul {
     text-align: center;
     list-style-position: inside;

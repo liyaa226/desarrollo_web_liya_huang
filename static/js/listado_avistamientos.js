@@ -73,6 +73,5 @@ function nextPage() {
   }
 }
 
-/*
-esto fue hecho basado en https://www.raymondcamden.com/2022/03/14/building-table-sorting-and-pagination-in-javascript
-/*
+
+// esto fue hecho basado en https://www.raymondcamden.com/2022/03/14/building-table-sorting-and-pagination-in-javascript

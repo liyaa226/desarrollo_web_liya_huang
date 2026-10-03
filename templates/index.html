@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <title>Avistamiento de Aves Chilenas</title>
-    <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
 </head>
 <body>
 
     <header>
         <h1>Inicio</h1>
+            <h2>Te damos la bienvenida</h2>
 
         <ul> 
             <li>
@@ -26,8 +27,23 @@
     </header>
 
     <main>
+        <h2>Últimos avistamientos</h2>
+            <table border=1>
+            <tr>
+                <td><b>ID</b></td>
+                <td><b>Nombre</b></td>
+                <td><b>Apellido</b></td>
+            </tr>
+            {% for p in personas %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.nombre }}</td>
+                <td>{{ p.apellido }}</td>
+            </tr>
+            {% endfor %}
+            </table>
         <article>
-            <h2>Sobre el sitio</h2>
+            <h3>Sobre el sitio</h3>
             <p>En la Unión de Ornitólogos de Chile existe una creciente preocupación por mantener
 actualizado el registro de avistamientos de aves en Chile, en particular les preocupa que con
 los fenómenos del clima se estén produciendo cambios bruscos en la población de aves.
