@@ -96,17 +96,25 @@ const validateForm = () => {
     // Agregar botones para enviar el formulario o volver al inicio
     let submitButton = document.createElement("button");
     submitButton.innerText = "Enviar";
+    submitButton.type = "submit";
     submitButton.style.marginRight = "10px";
     submitButton.addEventListener("click", () => {
-      // myForm.submit();
-      // no tenemos un backend al cual enviarle los datos
+      myForm.submit();
+      
     });
 
     let backButton = document.createElement("button");
     backButton.innerText = "Volver";
+    backButton.type = "button";
     backButton.addEventListener("click", () => {
       // Volver al menú de inicio
-      window.location.href = "../html/index.html";
+         //caso live server
+    if (window.location.port === "5500") {
+        window.location.href = "../html/index.html";
+    } else {
+      //caso flask
+        window.location.href = "/";
+    }
       myForm.style.display = "block";
       validationBox.hidden = true;
     });
