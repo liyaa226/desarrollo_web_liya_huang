@@ -109,11 +109,30 @@ def create_voluntario(nombre, email, comuna_id, telefono):
     session.close()
     
 
-def get_avistamiento(page_size):
+def get_avistamientos():
     session = SessionLocal()
-    avistamientos = session.query(Avistamiento).limit(page_size).all()
-    session.close()
-    return avistamientos
+    try:
+        resultado = session.execute(
+            text(""" SELECT a.id, av.nombre AS ave,
+                    DATE(a.fecha_hora) AS fecha, a.lugar
+                FROM avistamiento a
+                INNER JOIN ave av ON a.ave_id = av.id
+                ORDER BY a.fecha_hora DESC
+            """)
+        ).fetchall()
+
+        return [
+            {
+                "id": row.id,
+                "ave": row.ave,
+                "fecha": str(row.fecha),
+                "lugar": row.lugar
+            }
+            for row in resultado
+        ]
+
+    finally:
+        session.close()
 
 def get_ultimos_avistamientos(page_size):
     session = SessionLocal()

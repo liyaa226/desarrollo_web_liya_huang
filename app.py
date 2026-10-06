@@ -108,7 +108,10 @@ def informar_avistamiento():
         img_filename = f"{_filename}.{_extension}"
 
         # 2. save img as a file
-        ruta_archivo= archivo.save(os.path.join(app.config["UPLOAD_FOLDER"], img_filename))
+        ruta_fisica= (os.path.join(app.config["UPLOAD_FOLDER"], img_filename))
+        archivo.save(ruta_fisica)
+        ruta_archivo = os.path.join("uploads", img_filename).replace("\\", "/")
+
 
         # 3. guardar avistamiento en la base de datos
         user = db.get_voluntario_by_email(username)
@@ -127,9 +130,9 @@ def informar_avistamiento():
 @app.route("/listado_avistamientos.html", methods=['GET'])
 def listado_avistamientos():
   
-    data = db.get_avistamiento(10)
+    avistamientos = db.get_avistamientos()
 
-    return render_template("listado_avistamientos.html", data=data)
+    return render_template("listado_avistamientos.html", avistamientos=avistamientos)
 
 if __name__ == "__main__":
     app.run(debug=True)

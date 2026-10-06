@@ -7,16 +7,7 @@ let sortAsc = false;
 const pageSize = 3;
 let curPage = 1;
 
-const avistamientos = [
-  { ave: "Cóndor", fecha: "2026-09-01", lugar: "Cajón del Maipo" },
-  { ave: "Águila", fecha: "2026-08-28", lugar: "Farellones" },
-  { ave: "Flamenco", fecha: "2026-08-25", lugar: "San Pedro de Atacama" },
-  { ave: "Halcón", fecha: "2026-08-20", lugar: "Valparaíso" },
-  { ave: "Cóndor", fecha: "2026-08-15", lugar: "Torres del Paine" },
-  { ave: "Águila", fecha: "2026-08-10", lugar: "Rancagua" },
-  { ave: "Flamenco", fecha: "2026-08-05", lugar: "Chañaral" },
-  { ave: "Halcón", fecha: "2026-07-30", lugar: "Santiago" }
-];
+let avistamientos = [];
 
 
 async function init() {
