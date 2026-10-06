@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Avistamiento de Aves Chilenas</title>
+</head>
+
+<body>
+
+    <header>
+        <h1>Inicio</h1>
+            <h2>Te damos la bienvenida</h2>
+
+        <ul> 
+            <li>
+                <a href="registro_voluntario.html">Registro de voluntario(a)</a>
+            </li>
+            <li>
+                <a href="informar_avistamiento.html">Informar avistamiento</a>
+            </li>
+            <li>
+                <a href="listado_avistamientos.html">Listado de avistamientos</a>
+            </li>    
+            <li>
+                <a href="estadisticas.html">Estadísticas</a>
+            </li>
+        </ul>
+    </header>
+
+    <main>
+        {% if avistamientos %}
+        <h2>Últimos avistamientos</h2>
+        <div>
+            <table border=1>
+            <tr>
+                <td><b>ID</b></td>
+                <td><b>Lugar</b></td>
+                <td><b>Archivo</b></td>
+            </tr>
+            {% for a in avistamientos %}
+            <tr>
+                <td>{{ a.id }}</td>
+                <td>{{ a.lugar }}</td>
+                <td>{{ a.archivo }}</td>
+            </tr>
+            {% endfor %}
+            </table>
+        {% else %}
+            <p>No hay avistamientos registrados.</p>
+        {% endif %}
+            
+        </div>
+        
+        <article>
+            <h3>Sobre el sitio</h3>
+            <p>En la Unión de Ornitólogos de Chile existe una creciente preocupación por mantener
+actualizado el registro de avistamientos de aves en Chile, en particular les preocupa que con
+los fenómenos del clima se estén produciendo cambios bruscos en la población de aves.
+Así que se desarrolló un sistema que permita gestionar avistamientos
+de aves reportados por personas voluntarias. </p>
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Avistamiento de Aves Chilenas</p>
+    </footer>
+
+</body>
+</html>

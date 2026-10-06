@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Iniciar sesión</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <div id="val-box" hidden>
+            <h2 id="val-msg"></h2>
+            <ul id="val-list"></ul>
+        </div>
+        <h1>Iniciar sesión</h1>
+        <form name="myForm" action="/iniciar_sesion.html" method="post" enctype="multipart/form-data">
+            
+
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" minlength="10" placeholder="ejemplo@correo.cl" required><br>
+            
+            <button id="submit-btn" type="submit">Iniciar sesión</button>
+            
+        </form>
+    </div>
+    <script src="../static/js/validation.js"></script>
+</body>
+</html>
