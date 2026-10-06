@@ -11,7 +11,7 @@
             <ul id="val-list"></ul>
         </div>
         <h1>Informar avistamientos</h1>
-        <form name="myFormAvistamientos" method="post" enctype="multipart/form-data">
+        <form name="myFormAvistamientos" action="/informar_avistamiento.html"  method="post" enctype="multipart/form-data">
             <label for="tipo">Tipo de ave</label>
             <select id="tipo" name="tipo">
                 <option value="">--Seleccione un tipo de ave--</option>
@@ -36,7 +36,7 @@
             <label for="archivo">Adjuntar archivo:</label>
             <input type="file" id="archivo" name="archivo" required><br>
             
-            <button id="submit-btn" type="button">Enviar</button>
+            <button id="submit-btn" type="submit">Enviar</button>
         </form>
     </div>
     <script src="../static/js/validation_avistamientos.js"></script>

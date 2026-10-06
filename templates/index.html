@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <title>Avistamiento de Aves Chilenas</title>
-    <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
 </head>
+
 <body>
 
     <header>
@@ -27,21 +27,29 @@
     </header>
 
     <main>
+        {% if avistamientos %}
         <h2>Últimos avistamientos</h2>
+        <div>
             <table border=1>
             <tr>
                 <td><b>ID</b></td>
-                <td><b>Nombre</b></td>
-                <td><b>Apellido</b></td>
+                <td><b>Lugar</b></td>
+                <td><b>Archivo</b></td>
             </tr>
-            {% for p in personas %}
+            {% for a in avistamientos %}
             <tr>
-                <td>{{ p.id }}</td>
-                <td>{{ p.nombre }}</td>
-                <td>{{ p.apellido }}</td>
+                <td>{{ a.id }}</td>
+                <td>{{ a.lugar }}</td>
+                <td>{{ a.archivo }}</td>
             </tr>
             {% endfor %}
             </table>
+        {% else %}
+            <p>No hay avistamientos registrados.</p>
+        {% endif %}
+            
+        </div>
+        
         <article>
             <h3>Sobre el sitio</h3>
             <p>En la Unión de Ornitólogos de Chile existe una creciente preocupación por mantener

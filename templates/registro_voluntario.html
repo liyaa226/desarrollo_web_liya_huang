@@ -11,28 +11,28 @@
             <ul id="val-list"></ul>
         </div>
         <h1>Registro de voluntario(a)</h1>
-        <form name="myForm" method="post" enctype="multipart/form-data">
+        <form name="myForm" action="/registro_voluntario.html" method="post" enctype="multipart/form-data">
             
             <label for="nombre">Nombre</label>
-            <input type="nombre" name="nombre" id="nombre" minlength="4" placeholder="Escribe tu nombre" required><br>
+            <input type="text" name="nombre" id="nombre" minlength="4" placeholder="Escribe tu nombre" required><br>
 
             <label for="email">Email</label>
             <input type="email" name="email" id="email" minlength="10" placeholder="ejemplo@correo.cl" required><br>
 
             <label for="phone">Phone</label>
-            <input type="text" name="phone" id="phone" minlength="9" placeholder="123456789"><br>
+            <input type="text" name="phone" id="phone" minlength="9" placeholder="123456789" required><br>
             
             <label for="select-region">Región</label>
             <select name="select-region" id="select-region" required>
                 <option value="">Seleccione una región</option>
             </select><br>
 
-            <label for="select-coumna">Comuna</label>
+            <label for="select-comuna">Comuna</label>
             <select name="select-comuna" id="select-comuna" required>
                 <option value="">Seleccione una comuna</option>
             </select><br>
 
-            <button id="submit-btn" type="button">Registrarse</button>
+            <button id="submit-btn" type="submit">Registrarse</button>
             
         </form>
     </div>
