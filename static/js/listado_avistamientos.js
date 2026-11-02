@@ -14,10 +14,15 @@ async function init() {
   
   // Seleccionar la tabla
   table = document.querySelector('#tablaAvistamientos tbody');
+  avistamientos = JSON.parse(document.querySelector('#datos-avistamientos').textContent)
 
-  renderTable()
-  document.querySelector('#nextButton').addEventListener('click', nextPage, false);
-  document.querySelector('#prevButton').addEventListener('click', previousPage, false);
+  document.querySelector('#nextButton').addEventListener('click', nextPage);
+  document.querySelector('#prevButton').addEventListener('click', previousPage);
+  document.querySelectorAll('#tablaAvistamientos th[data-sort]').forEach(header => {
+    header.addEventListener('click', sort);
+  });
+
+  renderTable();
 }
 
 function renderTable() {
@@ -41,7 +46,6 @@ function sort(e) {
   let thisSort = e.target.dataset.sort;
   if(sortCol === thisSort) sortAsc = !sortAsc;
   sortCol = thisSort;
-  console.log('sort dir is ', sortAsc);
   avistamientos.sort((a, b) => {
     if(a[sortCol] < b[sortCol]) return sortAsc?1:-1;
     if(a[sortCol] > b[sortCol]) return sortAsc?-1:1;
