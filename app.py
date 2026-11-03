@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, flash, jsonify, request, render_template, redirect, url_for, session
 from utils.validations import validate_login_user, validate_register_user, validate_avistamiento
 from database import db
 from werkzeug.utils import secure_filename
@@ -123,8 +123,9 @@ def informar_avistamiento():
                 error=error
             )
         db.create_avistamiento(user.id, ave_id, fecha, hora, lugar, img_filename, ruta_archivo)
+        flash("¡Avistamiento enviado!", "success")
         return redirect(url_for("index"))
-
+    
     return render_template("informar_avistamiento.html")
 
 @app.route("/listado_avistamientos.html", methods=['GET'])
@@ -133,6 +134,14 @@ def listado_avistamientos():
     avistamientos = db.get_avistamientos()
 
     return render_template("listado_avistamientos.html", avistamientos=avistamientos)
+
+@app.route("/estadisticas.html", methods=["GET"])
+def estadisticas():
+    return render_template("estadisticas.html")
+
+@app.route("/api/estadisticas", methods=["GET"])
+def estadisticas_datos():
+    return jsonify(db.get_estadisticas())
 
 if __name__ == "__main__":
     app.run(debug=True)

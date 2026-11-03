@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Estadísticas de avistamientos</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/stats.css">
+</head>
+<body>
+    <main data-estadisticas-url="{{ url_for('estadisticas_datos') }}">
+        <h1>Estadísticas</h1>
+        <p id="estado-estadisticas" role="status">Cargando estadísticas...</p>
+
+        <section>
+            <h2>Avistamientos registrados por día</h2>
+            <div id="grafico-avistamientos-dia" class="grafico"></div>
+        </section>
+
+        <section>
+            <h2>Total de avistamientos por tipo de ave</h2>
+            <div id="grafico-avistamientos-ave" class="grafico"></div>
+        </section>
+
+        <section>
+            <h2>Voluntarios registrados por comuna</h2>
+            <div id="grafico-voluntarios-comuna" class="grafico"></div>
+        </section>
+
+        <p><a href="{{ url_for('index') }}">Volver a la portada</a></p>
+    </main>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="{{ url_for('static', filename='js/estadisticas.js') }}"></script>
+</body>
+</html>
