@@ -56,6 +56,15 @@ class Registro(Base):
 
     avistamientos = relationship("Avistamiento", back_populates="registros")
 
+class Comentario(Base):
+    __tablename__ = 'comentario'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(80), nullable=False)
+    texto = Column(String(300), nullable=False)
+    fecha = Column(DateTime, nullable=False, default=datetime.now)
+    avistamiento_id = Column(ForeignKey('avistamiento.id'), nullable=False)
+
 # --- Database Functions ---
 
 def get_voluntario_by_id(id):
@@ -134,54 +143,7 @@ def get_avistamientos():
     finally:
         session.close()
 
-def get_estadisticas():
-    session = SessionLocal()
-    try:
-        por_dia = session.execute(
-            text("""
-                SELECT DATE(fecha_hora) AS fecha, COUNT(*) AS cantidad
-                FROM avistamiento
-                GROUP BY DATE(fecha_hora)
-                ORDER BY fecha
-            """)
-        ).fetchall()
 
-        por_ave = session.execute(
-            text("""
-                SELECT ave.nombre AS ave, COUNT(*) AS cantidad
-                FROM avistamiento
-                INNER JOIN ave ON avistamiento.ave_id = ave.id
-                GROUP BY ave.id, ave.nombre
-                ORDER BY cantidad DESC, ave.nombre
-            """)
-        ).fetchall()
-
-        voluntarios_por_comuna = session.execute(
-            text("""
-                SELECT comuna.nombre AS comuna, COUNT(*) AS cantidad
-                FROM voluntario
-                INNER JOIN comuna ON voluntario.comuna_id = comuna.id
-                GROUP BY comuna.id, comuna.nombre
-                ORDER BY comuna.nombre
-            """)
-        ).fetchall()
-
-        return {
-            "avistamientos_por_dia": [
-                {"fecha": str(row.fecha), "cantidad": row.cantidad}
-                for row in por_dia
-            ],
-            "avistamientos_por_ave": [
-                {"ave": row.ave, "cantidad": row.cantidad}
-                for row in por_ave
-            ],
-            "voluntarios_por_comuna": [
-                {"comuna": row.comuna, "cantidad": row.cantidad}
-                for row in voluntarios_por_comuna
-            ],
-        }
-    finally:
-        session.close()
 
 def get_ultimos_avistamientos(page_size):
     session = SessionLocal()
@@ -219,6 +181,24 @@ def get_avistamiento_by_id(id):
     session.close()
     return avistamientos
 
+def get_ruta_archivo_by_avistamiento_id(avistamiento_id):
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text("""
+                SELECT ruta_archivo
+                FROM registro
+                WHERE avistamiento_id = :avistamiento_id
+                ORDER BY id DESC
+                LIMIT 1
+            """),
+            {"avistamiento_id": avistamiento_id}
+        ).fetchone()
+        return resultado[0] if resultado else None
+    finally:
+        session.close()
+
+
 def create_avistamiento(voluntario_id ,ave_id, fecha, hora, lugar, nombre_archivo, ruta_archivo):
     session = SessionLocal()
 
@@ -252,14 +232,13 @@ def create_avistamiento(voluntario_id ,ave_id, fecha, hora, lugar, nombre_archiv
     session.commit()
     session.close()
 
-from sqlalchemy import text
 
 def get_ave_by_id(ave_id):
     session = SessionLocal()
 
     try:
         resultado = session.execute(
-            text(""" SELECT * FROM ave WHERE id = :id"""),
+            text(""" SELECT nombre FROM ave WHERE id = :id"""),
             {"id": ave_id}
         ).fetchone()
         return resultado[0] if resultado else None
@@ -309,3 +288,75 @@ def login_user(email):
         return False, "Estás iniciando sesión con un correo diferente al que te registraste"
 
     return True, None
+
+
+def get_estadisticas():
+    session = SessionLocal()
+    try:
+        por_dia = session.execute(
+            text("""
+                SELECT DATE(fecha_hora) AS fecha, COUNT(*) AS cantidad
+                FROM avistamiento
+                GROUP BY DATE(fecha_hora)
+                ORDER BY fecha
+            """)
+        ).fetchall()
+
+        por_ave = session.execute(
+            text("""
+                SELECT ave.nombre AS ave, COUNT(*) AS cantidad
+                FROM avistamiento
+                INNER JOIN ave ON avistamiento.ave_id = ave.id
+                GROUP BY ave.id, ave.nombre
+                ORDER BY cantidad DESC, ave.nombre
+            """)
+        ).fetchall()
+
+        voluntarios_por_comuna = session.execute(
+            text("""
+                SELECT comuna.nombre AS comuna, COUNT(*) AS cantidad
+                FROM voluntario
+                INNER JOIN comuna ON voluntario.comuna_id = comuna.id
+                GROUP BY comuna.id, comuna.nombre
+                ORDER BY comuna.nombre
+            """)
+        ).fetchall()
+
+        return {
+            "avistamientos_por_dia": [
+                {"fecha": str(row.fecha), "cantidad": row.cantidad}
+                for row in por_dia
+            ],
+            "avistamientos_por_ave": [
+                {"ave": row.ave, "cantidad": row.cantidad}
+                for row in por_ave
+            ],
+            "voluntarios_por_comuna": [
+                {"comuna": row.comuna, "cantidad": row.cantidad}
+                for row in voluntarios_por_comuna
+            ],
+        }
+    finally:
+        session.close()
+
+def get_comentarios_by_avistamiento(avistamiento_id):
+    session = SessionLocal()
+    comentarios = session.query(Comentario).filter_by(avistamiento_id=avistamiento_id).all()
+    session.close()
+    return comentarios    
+
+def create_comentario(avistamiento_id, nombre, texto):
+    session = SessionLocal()
+    try:
+        new_comentario = Comentario(
+            avistamiento_id=avistamiento_id,
+            nombre=nombre,
+            texto=texto
+        )
+        session.add(new_comentario)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
