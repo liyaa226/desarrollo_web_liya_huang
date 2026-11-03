@@ -60,14 +60,19 @@ def validate_lugar(lugar):
 def validate_avistamiento(nombre_ave, lugar, fecha, hora, archivo):
     return (
         validate_lugar(lugar) and
-        validate_img(archivo)
+        validate_media(archivo)
     )
 
+def validate_comentario(nombre, texto):
+    if not isinstance(nombre, str) or not isinstance(texto, str):
+        return False
 
-def validate_img(archivo):
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
-    ALLOWED_MIMETYPES = {"image/jpeg", "image/png", "image/gif"}
+    nombre = nombre.strip()
+    texto = texto.strip()
+    return 3 <= len(nombre) <= 50 and 5 <= len(texto) <= 300
 
+
+def validate_media(archivo):
     # check if a file was submitted
     if archivo is None:
         return False
@@ -76,13 +81,8 @@ def validate_img(archivo):
     if archivo.filename == "":
         return False
     
-    # check file extension
     ftype_guess = filetype.guess(archivo)
-    if ftype_guess.extension not in ALLOWED_EXTENSIONS:
+    if ftype_guess is None:
         return False
-    # check mimetype
-    if ftype_guess.mime not in ALLOWED_MIMETYPES:
-        return False
-    return True
 
-
+    return ftype_guess.mime.startswith(("image/", "video/"))
