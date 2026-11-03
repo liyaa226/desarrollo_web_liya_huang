@@ -4,7 +4,7 @@
     <title>Avistamientos de Aves</title>
     <link rel="stylesheet" href="../static/css/styles.css">
 </head>
-<body>
+<body class="informar-page">
 
     <main class="main-containe">
         <h1>Avistamientos de Aves</h1>
@@ -49,10 +49,12 @@
         <button id="nextButton">Siguiente</button> 
 
     </main>
+    
     <script id="datos-avistamientos" type="application/json">
     {{ avistamientos | tojson }}
     </script>
     <script src="../static/js/listado_avistamientos.js"></script>
+    <p><a href="{{ url_for('index') }}">Volver a la portada</a></p>
 </body>
 </html>
 

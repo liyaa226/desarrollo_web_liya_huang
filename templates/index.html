@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Avistamiento de Aves Chilenas</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/index.css">
 </head>
 
 <body>
@@ -10,7 +11,15 @@
         <h1>Inicio</h1>
             <h2>Te damos la bienvenida</h2>
 
-        <ul> 
+        {% if session.get('user') %}
+        
+            <form id="btn-logout" action="{{ url_for('logout') }}" method="get">
+                <button type="submit">Cerrar sesión</button>
+            </form>
+        
+        {% endif %}
+
+        <ul>     
             <li>
                 <a href="registro_voluntario.html">Registro de voluntario(a)</a>
             </li>
@@ -27,8 +36,14 @@
     </header>
 
     <main>
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in mensajes %}
+            <p class="mensaje-flash {{ categoria }}" role="status">{{ mensaje }}</p>
+            {% endfor %}
+        {% endwith %}
+
         {% if avistamientos %}
-        <h2>Últimos avistamientos</h2>
+        <h3>Últimos avistamientos</h3>
         <div>
             <table border=1>
             <tr>
@@ -40,7 +55,17 @@
             <tr>
                 <td>{{ a.id }}</td>
                 <td>{{ a.lugar }}</td>
-                <td>{{ a.archivo }}</td>
+                <td>
+                    {% if a.archivo %}
+                    <img
+                        src="{{ url_for('static', filename=a.archivo) }}"
+                        alt="Fotografía del avistamiento {{ a.id }}"
+                        width="160"
+                    >
+                    {% else %}
+                    Sin fotografía
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
             </table>
