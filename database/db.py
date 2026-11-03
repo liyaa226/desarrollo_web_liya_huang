@@ -134,11 +134,84 @@ def get_avistamientos():
     finally:
         session.close()
 
+def get_estadisticas():
+    session = SessionLocal()
+    try:
+        por_dia = session.execute(
+            text("""
+                SELECT DATE(fecha_hora) AS fecha, COUNT(*) AS cantidad
+                FROM avistamiento
+                GROUP BY DATE(fecha_hora)
+                ORDER BY fecha
+            """)
+        ).fetchall()
+
+        por_ave = session.execute(
+            text("""
+                SELECT ave.nombre AS ave, COUNT(*) AS cantidad
+                FROM avistamiento
+                INNER JOIN ave ON avistamiento.ave_id = ave.id
+                GROUP BY ave.id, ave.nombre
+                ORDER BY cantidad DESC, ave.nombre
+            """)
+        ).fetchall()
+
+        voluntarios_por_comuna = session.execute(
+            text("""
+                SELECT comuna.nombre AS comuna, COUNT(*) AS cantidad
+                FROM voluntario
+                INNER JOIN comuna ON voluntario.comuna_id = comuna.id
+                GROUP BY comuna.id, comuna.nombre
+                ORDER BY comuna.nombre
+            """)
+        ).fetchall()
+
+        return {
+            "avistamientos_por_dia": [
+                {"fecha": str(row.fecha), "cantidad": row.cantidad}
+                for row in por_dia
+            ],
+            "avistamientos_por_ave": [
+                {"ave": row.ave, "cantidad": row.cantidad}
+                for row in por_ave
+            ],
+            "voluntarios_por_comuna": [
+                {"comuna": row.comuna, "cantidad": row.cantidad}
+                for row in voluntarios_por_comuna
+            ],
+        }
+    finally:
+        session.close()
+
 def get_ultimos_avistamientos(page_size):
     session = SessionLocal()
-    ultimos_avistamientos = session.query(Avistamiento).order_by(Avistamiento.id.desc()).limit(page_size).all()
-    session.close()
-    return ultimos_avistamientos
+    try:
+        resultado = session.execute(
+            text("""
+                SELECT a.id, a.lugar, (
+                    SELECT r.ruta_archivo
+                    FROM registro AS r
+                    WHERE r.avistamiento_id = a.id
+                    ORDER BY r.id DESC
+                    LIMIT 1
+                ) AS archivo
+                FROM avistamiento AS a
+                ORDER BY a.fecha_hora DESC
+                LIMIT :page_size
+            """),
+            {"page_size": page_size}
+        ).fetchall()
+
+        return [
+            {
+                "id": row.id,
+                "lugar": row.lugar,
+                "archivo": row.archivo
+            }
+            for row in resultado
+        ]
+    finally:
+        session.close()
 
 def get_avistamiento_by_id(id):
     session = SessionLocal()
