@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalle del avistamiento</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="informar-page">
+    <main
+        class="main-container detalle-container"
+        data-comentarios-url="{{ url_for('comentarios_avistamiento', avistamiento_id=avistamiento.id) }}"
+    >
+        <h1>Detalle del avistamiento</h1>
+        <ul>
+            <li>Nombre del ave: <strong>{{ nombre_ave }}</strong>
+            <li>Fecha y hora: <strong>{{ avistamiento.fecha_hora }}</strong>
+            <li>Lugar: <strong>{{ avistamiento.lugar }}</strong>
+            {% if avistamiento.descripcion %}
+            <li>Descripción: <strong>{{ avistamiento.descripcion }}</strong>
+            {% endif %}
+        </ul>
+
+        {% if archivo and es_video %}
+        <video class="media-avistamiento" controls>
+            <source src="{{ url_for('static', filename=archivo) }}">
+            Tu navegador no puede reproducir este video.
+        </video>
+        {% elif archivo %}
+        <img
+            src="{{ url_for('static', filename=archivo) }}"
+            alt="Fotografía del avistamiento"
+            class="foto-avistamiento"
+        >
+        {% endif %}
+
+        <section >
+            <h2 id="comentarios-heading">Comentarios</h2>
+            <p id="estado-comentarios" role="status">Cargando comentarios...</p>
+            <ul id="lista-comentarios"></ul>
+
+            <h3>Agregar comentario</h3>
+            <form id="form-comentario">
+                <label for="nombre-comentarista">Nombre del comentarista</label>
+                <input
+                    type="text"
+                    id="nombre-comentarista"
+                    name="nombre"
+                    minlength="3"
+                    maxlength="50"
+                    required
+                >
+
+                <label for="texto-comentario">Comentario</label>
+                <textarea
+                    id="texto-comentario"
+                    name="texto"
+                    rows="3"
+                    cols="40"
+                    minlength="5"
+                    maxlength="300"
+                    required
+                ></textarea>
+
+                <button id="submit-btn" type="submit">Agregar comentario</button>
+            </form>
+            <p id="resultado-comentario" role="status"></p>
+        </section>
+
+        <p><a href="{{ url_for('listado_avistamientos') }}">Volver al listado</a></p>
+        <p><a href="{{ url_for('index') }}">Volver a la portada</a></p>
+    </main>
+    <script src="{{ url_for('static', filename='js/comentarios.js') }}"></script>
+</body>
+</html>
