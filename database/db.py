@@ -123,7 +123,14 @@ def get_avistamientos():
     try:
         resultado = session.execute(
             text(""" SELECT a.id, av.nombre AS ave,
-                    DATE(a.fecha_hora) AS fecha, a.lugar
+                    DATE(a.fecha_hora) AS fecha, a.lugar,
+                    (
+                        SELECT r.ruta_archivo
+                        FROM registro AS r
+                        WHERE r.avistamiento_id = a.id
+                        ORDER BY r.id DESC
+                        LIMIT 1
+                    ) AS archivo
                 FROM avistamiento a
                 INNER JOIN ave av ON a.ave_id = av.id
                 ORDER BY a.fecha_hora DESC
@@ -135,7 +142,8 @@ def get_avistamientos():
                 "id": row.id,
                 "ave": row.ave,
                 "fecha": str(row.fecha),
-                "lugar": row.lugar
+                "lugar": row.lugar,
+                "archivo": row.archivo
             }
             for row in resultado
         ]

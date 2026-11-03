@@ -6,7 +6,7 @@
 </head>
 <body class="informar-page">
 
-    <main class="main-containe">
+    <main class="main-containe" data-static-url="{{ url_for('static', filename='') }}">
         <h1>Avistamientos de Aves</h1>
 
         <section class="filtros">
@@ -38,10 +38,12 @@
                     <th data-sort="ave">Ave</th>
                     <th data-sort="fecha">Fecha</th>
                     <th data-sort="lugar">Lugar</th>
+                    <th>Archivo</th>
+                    <th>Detalle</th>
                 </tr>
             </thead>
             <tbody>
-                <tr><td colspan="4"><i>Loading...</i></td></tr>
+                <tr><td colspan="5"><i>Loading...</i></td></tr>
             </tbody>
         </table>
 
@@ -57,5 +59,3 @@
     <p><a href="{{ url_for('index') }}">Volver a la portada</a></p>
 </body>
 </html>
-
-

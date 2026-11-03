@@ -8,12 +8,14 @@ const pageSize = 3;
 let curPage = 1;
 
 let avistamientos = [];
+let staticUrl;
 
 
 async function init() {
   
   // Seleccionar la tabla
   table = document.querySelector('#tablaAvistamientos tbody');
+  staticUrl = document.querySelector('#tablaAvistamientos').closest('main').dataset.staticUrl;
   avistamientos = JSON.parse(document.querySelector('#datos-avistamientos').textContent)
 
   document.querySelector('#nextButton').addEventListener('click', nextPage);
@@ -33,10 +35,19 @@ function renderTable() {
         let end =curPage*pageSize;
         if(index >= start && index < end) return true;
   }).forEach(c => {
+     let foto = '';
+     if (c.archivo) {
+       const extension = c.archivo.split('.').pop().toLowerCase();
+       if (['png', 'jpg', 'jpeg', 'gif'].includes(extension)) {
+         foto = `<img class="miniatura-avistamiento" src="${staticUrl}${c.archivo}" alt="Foto del avistamiento ${c.id}">`;
+       }
+     }
+
      result += `<tr>
      <td>${c.ave}</td>
      <td>${c.fecha}</td>
      <td>${c.lugar}</td>
+     <td>${foto}</td>
      <td><a href="/avistamientos/${encodeURIComponent(c.id)}">Ver detalle</a></td>
      </tr>`;
   });

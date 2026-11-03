@@ -21,12 +21,7 @@
             {% endif %}
         </ul>
 
-        {% if archivo and es_video %}
-        <video class="media-avistamiento" controls>
-            <source src="{{ url_for('static', filename=archivo) }}">
-            Tu navegador no puede reproducir este video.
-        </video>
-        {% elif archivo %}
+        {% if archivo %}
         <img
             src="{{ url_for('static', filename=archivo) }}"
             alt="Fotografía del avistamiento"
