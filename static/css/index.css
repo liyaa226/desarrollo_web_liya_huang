@@ -9,8 +9,13 @@ h2 {
     font-family: Arial;
 }
 
+h3 {
+    text-align: left;
+    font-family: Arial;
+}
+
 ul {
-    text-align: center;
+    text-align: left;
     list-style-position: inside;
     font-size: 20px;
     font-family: Arial;
@@ -22,4 +27,32 @@ body {
     background-color: #f4f4f4;
     margin: 30;
     height: 100vh;
+    position: relative;
+}
+
+.mensaje-flash {
+    padding: 12px 16px;
+    border-radius: 4px;
+    background-color: #e8f5e9;
+    color: #1b5e20;
+    border: 1px solid #a5d6a7;
+}
+
+#btn-logout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+#btn-logout button {
+    padding: 10px 14px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#btn-logout button:hover {
+    background-color: #c9302c;
 }
