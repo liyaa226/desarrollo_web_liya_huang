@@ -1,7 +1,5 @@
 # desarrollo_web_liya_huang
 
-Se hizo un índice o inicio que contiene las referencis alos otros archivos
+Las estadísticas se pueden acceder desde el inicio de la página.
 
-Se realizó el registro de voluntario(a) y el formulario de avistamientos en base a los archivos del auxiliar 3
-
-Se desarrollo la tabla de listado de avistamiento en base a este tutorial, pero no pude lograr se se mostrara: https://www.raymondcamden.com/2022/03/14/building-table-sorting-and-pagination-in-javascript 
+La funcionalidad que permite ingresar y visualizar los comentarios de los avistamintos, se accede mediante el listado de avistamientos, donde cada uno tiene su propio enlace al avistamiento específico.
