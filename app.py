@@ -1,5 +1,10 @@
-from flask import Flask, flash, jsonify, request, render_template, redirect, url_for, session
-from utils.validations import validate_login_user, validate_register_user, validate_avistamiento
+from flask import Flask, abort, flash, jsonify, request, render_template, redirect, url_for, session
+from utils.validations import (
+    validate_login_user,
+    validate_register_user,
+    validate_avistamiento,
+    validate_comentario,
+)
 from database import db
 from werkzeug.utils import secure_filename
 import hashlib
@@ -134,6 +139,53 @@ def listado_avistamientos():
     avistamientos = db.get_avistamientos()
 
     return render_template("listado_avistamientos.html", avistamientos=avistamientos)
+
+@app.route("/avistamientos/<int:avistamiento_id>", methods=["GET"])
+def detalle_avistamiento(avistamiento_id):
+    avistamiento = db.get_avistamiento_by_id(avistamiento_id)
+    if avistamiento is None:
+        abort(404)
+
+    nombre_ave = db.get_ave_by_id(avistamiento.ave_id)
+    archivo = db.get_ruta_archivo_by_avistamiento_id(avistamiento_id)
+    extension = os.path.splitext(archivo or "")[1].lower()
+    es_video = extension in {".mp4", ".webm", ".mov", ".avi", ".mkv", ".mpeg", ".mpg", ".3gp", ".wmv", ".flv"}
+    return render_template(
+        "detalle_avistamiento.html",
+        avistamiento=avistamiento,
+        nombre_ave=nombre_ave,
+        archivo=archivo,
+        es_video=es_video
+    )
+
+@app.route("/api/avistamientos/<int:avistamiento_id>/comentarios", methods=["GET"])
+def comentarios_avistamiento(avistamiento_id):
+    if db.get_avistamiento_by_id(avistamiento_id) is None:
+        return jsonify({"error": "El avistamiento no existe."}), 404
+
+    return jsonify(db.get_comentarios_by_avistamiento(avistamiento_id))
+
+@app.route("/api/avistamientos/<int:avistamiento_id>/comentarios", methods=["POST"])
+def agregar_comentario(avistamiento_id):
+    if db.get_avistamiento_by_id(avistamiento_id) is None:
+        return jsonify({"error": "El avistamiento no existe."}), 404
+
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return jsonify({"error": "Envía el comentario como un objeto JSON."}), 400
+
+    nombre = datos.get("nombre")
+    texto = datos.get("texto")
+    if not validate_comentario(nombre, texto):
+        return jsonify({
+            "error": (
+                "El nombre debe tener entre 3 y 50 caracteres y el comentario "
+                "entre 5 y 300 caracteres."
+            )
+        }), 400
+
+    db.create_comentario(avistamiento_id, nombre.strip(), texto.strip())
+    return jsonify({"mensaje": "Comentario agregado."}), 201
 
 @app.route("/estadisticas.html", methods=["GET"])
 def estadisticas():

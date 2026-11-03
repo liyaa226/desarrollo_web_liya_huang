@@ -37,6 +37,7 @@ function renderTable() {
      <td>${c.ave}</td>
      <td>${c.fecha}</td>
      <td>${c.lugar}</td>
+     <td><a href="/avistamientos/${encodeURIComponent(c.id)}">Ver detalle</a></td>
      </tr>`;
   });
   table.innerHTML = result;
