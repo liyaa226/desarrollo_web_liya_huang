@@ -8,28 +8,12 @@ const validateName = (name) => {
 
 const validateEmail = (email) => {
   if (!email) return false;
-  // validación de longitud
-  let lengthValid = email.length > 15;
-
-  // validamos el formato
-  let re = /^[\w.]+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
-  let formatValid = re.test(email);
-
-  // devolvemos la lógica AND de las validaciones.
-  return lengthValid && formatValid;
+  const pattern = /^[A-Za-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/;
+  return email.length <= 254 && pattern.test(email);
 };
 
 const validatePhoneNumber = (phoneNumber) => {
-  if (!phoneNumber) return true;
-  // validación de longitud
-  let lengthValid = phoneNumber.length >= 8;
-
-  // validación de formato
-  let re = /^[0-9]+$/;
-  let formatValid = re.test(phoneNumber);
-
-  // devolvemos la lógica AND de las validaciones.
-  return lengthValid && formatValid;
+  return /^[0-9]{8,15}$/.test(phoneNumber);
 };
 
 const validateSelect = (select) => {
@@ -80,7 +64,7 @@ const validateForm = () => {
   if (!isValid) {
     validationListElem.textContent = "";
     // agregar elementos inválidos al elemento val-list.
-    for (input of invalidInputs) {
+    for (const input of invalidInputs) {
       let listElement = document.createElement("li");
       listElement.innerText = input;
       validationListElem.append(listElement);
