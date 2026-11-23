@@ -13,23 +13,35 @@
     >
         <h1>Detalle del avistamiento</h1>
         <ul>
-            <li>Nombre del ave: <strong>{{ nombre_ave }}</strong>
-            <li>Fecha y hora: <strong>{{ avistamiento.fecha_hora }}</strong>
-            <li>Lugar: <strong>{{ avistamiento.lugar }}</strong>
+            <li>Nombre del ave: <strong>{{ nombre_ave }}</strong></li>
+            <li>Fecha y hora: <strong>{{ avistamiento.fecha_hora }}</strong></li>
+            <li>Lugar: <strong>{{ avistamiento.lugar }}</strong></li>
             {% if avistamiento.descripcion %}
-            <li>Descripción: <strong>{{ avistamiento.descripcion }}</strong>
+            <li>Descripción: <strong>{{ avistamiento.descripcion }}</strong></li>
             {% endif %}
         </ul>
 
-        {% if archivo %}
-        <img
-            src="{{ url_for('static', filename=archivo) }}"
-            alt="Fotografía del avistamiento"
-            class="foto-avistamiento"
-        >
+        {% if archivos %}
+        <section aria-labelledby="medios-heading">
+            <h2 id="medios-heading">Archivos asociados</h2>
+            {% for archivo in archivos %}
+                {% if archivo.es_video %}
+                <video class="media-avistamiento" controls>
+                    <source src="{{ url_for('static', filename=archivo.ruta_archivo) }}">
+                    Tu navegador no puede reproducir este video.
+                </video>
+                {% else %}
+                <img
+                    src="{{ url_for('static', filename=archivo.ruta_archivo) }}"
+                    alt="Fotografía del avistamiento"
+                    class="foto-avistamiento"
+                >
+                {% endif %}
+            {% endfor %}
+        </section>
         {% endif %}
 
-        <section >
+        <section>
             <h2 id="comentarios-heading">Comentarios</h2>
             <p id="estado-comentarios" role="status">Cargando comentarios...</p>
             <ul id="lista-comentarios"></ul>

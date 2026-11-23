@@ -1,29 +1,30 @@
+from datetime import date, datetime
 import re
 import filetype
 
 def validate_nombre(value):
-    if(not value):
-        return False
-    lengthValid = len(value) > 4
-    return lengthValid
+    return isinstance(value, str) and len(value.strip()) >= 4
 
 
 def validate_password(value):
     malas = ["1234", "admin1", "odio a mis Aux >:(2"]
     return bool(re.search(r"\d", value)) and not value in malas
 
-#las validaciones como el formato específico están implementadas en validation.js
+# La validación del cliente complementa estas comprobaciones del servidor.
 def validate_email(value):
-    if(not value):
-        return False
-    lengthValid = len(value) > 10 
-    return lengthValid and "@" in value
+    return (
+        isinstance(value, str)
+        and len(value) >= 6
+        and len(value) <= 254
+        and re.fullmatch(
+            r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*"
+            r"@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}",
+            value,
+        ) is not None
+    )
 
 def validate_phone(value):
-    if(not value):
-        return False
-    lengthValid = len(value) > 8
-    return lengthValid
+    return isinstance(value, str) and re.fullmatch(r"[0-9]{8,15}", value) is not None
 
 
 def validate_region(value):
@@ -51,17 +52,38 @@ def validate_register_user(nombre, email, phone, region, comuna):
     )
 
 def validate_lugar(lugar):
-    if(not lugar):
-        return False
-    lengthValid = len(lugar) > 3
-    return lengthValid
+    return isinstance(lugar, str) and len(lugar.strip()) >= 4
 
 
-def validate_avistamiento(nombre_ave, lugar, fecha, hora, archivo):
-    return (
-        validate_lugar(lugar) and
-        validate_media(archivo)
-    )
+def validate_avistamiento(nombre_ave, lugar, fecha, hora, archivos):
+    errores = []
+    if not isinstance(nombre_ave, str) or not nombre_ave.strip():
+        errores.append("Selecciona o ingresa el nombre del ave.")
+    if not validate_lugar(lugar):
+        errores.append("El lugar debe tener al menos 4 caracteres.")
+
+    try:
+        fecha_objeto = datetime.strptime(fecha or "", "%Y-%m-%d").date()
+        if fecha_objeto.isoformat() != fecha:
+            raise ValueError
+    except ValueError:
+        errores.append("Ingresa una fecha válida.")
+    else:
+        if fecha_objeto > date.today():
+            errores.append("La fecha del avistamiento no puede ser futura.")
+
+    if hora and re.fullmatch(r"(?:[01][0-9]|2[0-3]):[0-5][0-9]", hora) is None:
+        errores.append("La hora debe tener formato HH:MM.")
+
+    archivos = [archivo for archivo in archivos if archivo and archivo.filename]
+    if not archivos:
+        errores.append("Adjunta al menos un archivo.")
+    elif len(archivos) > 5:
+        errores.append("Puedes adjuntar hasta 5 archivos.")
+    elif any(not validate_media(archivo) for archivo in archivos):
+        errores.append("Cada archivo debe ser una imagen o video válido.")
+
+    return errores
 
 def validate_comentario(nombre, texto):
     if not isinstance(nombre, str) or not isinstance(texto, str):
@@ -72,24 +94,25 @@ def validate_comentario(nombre, texto):
     return 3 <= len(nombre) <= 50 and 5 <= len(texto) <= 300
 
 
-def validate_img(archivo):
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
-    ALLOWED_MIMETYPES = {"image/jpeg", "image/png", "image/gif"}
+def validate_media(archivo):
+    image_types = {"image/jpeg", "image/png", "image/gif"}
+    video_types = {
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
+        "video/x-msvideo",
+        "video/x-matroska",
+        "video/mpeg",
+    }
 
-    # check if a file was submitted
-    if archivo is None:
+    if archivo is None or not archivo.filename:
         return False
 
-    # check if the browser submitted an empty file
-    if archivo.filename == "":
-        return False
-    
-    # check file extension
-    ftype_guess = filetype.guess(archivo)
-    if ftype_guess.extension not in ALLOWED_EXTENSIONS:
-        return False
-    # check mimetype
-    if ftype_guess.mime not in ALLOWED_MIMETYPES:
-        return False
-    return True
+    try:
+        archivo.stream.seek(0)
+        media_type = filetype.guess(archivo.stream)
+    finally:
+        archivo.stream.seek(0)
+
+    return media_type is not None and media_type.mime in image_types.union(video_types)
 

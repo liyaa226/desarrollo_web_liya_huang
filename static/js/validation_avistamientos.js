@@ -12,7 +12,7 @@ const validateFiles = (files) => {
   for (const file of files) {
     // el tipo de archivo debe ser "image/<foo>" o videos
     let fileFamily = file.type.split("/")[0];
-    typeValid &&= fileFamily == "image" || fileFamily=="video";
+    typeValid &&= fileFamily === "image" || fileFamily === "video";
   }
 
   // devolvemos la lógica AND de las validaciones.
@@ -38,7 +38,7 @@ const validateForm = () => {
   //Para el registro el de voluntario(a)
   let myForm = document.forms["myFormAvistamientos"];
   let fecha = myForm["fecha"].value;
-  let files = myForm["archivo"].files;
+  let files = myForm["archivos"].files;
 
   // variables auxiliares de validación y función.
   let invalidInputs = [];
@@ -67,7 +67,7 @@ const validateForm = () => {
   if (!isValid) {
     validationListElem.textContent = "";
     // agregar elementos inválidos al elemento val-list.
-    for (input of invalidInputs) {
+    for (const input of invalidInputs) {
       let listElement = document.createElement("li");
       listElement.innerText = input;
       validationListElem.append(listElement);

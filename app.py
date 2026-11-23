@@ -6,10 +6,9 @@ from utils.validations import (
     validate_comentario,
 )
 from database import db
-from werkzeug.utils import secure_filename
-import hashlib
 import filetype
 import os
+from uuid import uuid4
 
 UPLOAD_FOLDER = 'static/uploads'
 
@@ -29,17 +28,16 @@ def registro_voluntario():
         phone = request.form.get("phone")
         region = request.form.get("select-region")
         comuna = request.form.get("select-comuna")
-        error = ""
         if validate_register_user(nombre, email, phone, region, comuna):
             # try to register user
             status, msg = db.register_user(nombre, email, phone, region, comuna)
             if status:
-                # set user field in session
                 session["user"] = email
-                return redirect(url_for("informar_avistamiento"))
-            error += msg
+                flash("¡Registro de voluntario completado!", "success")
+                return redirect(url_for("index"))
+            error = msg
         else:
-            error += "Uno de los campos no es valido."
+            error = "Revisa los datos: nombre, correo, teléfono, región y comuna deben ser válidos."
 
         return render_template("registro_voluntario.html", error=error)
     
@@ -96,42 +94,42 @@ def informar_avistamiento():
     if username is None:
         return redirect(url_for("iniciar_sesion"))
 
-    tipo = request.form.get('tipo')
+    if request.method == "GET":
+        return render_template("informar_avistamiento.html")
+
     nombre_ave = request.form.get("nombre_ave", "").strip()
     lugar = request.form.get("lugar")
     fecha = request.form.get("fecha")
     hora = request.form.get("hora")
-    archivo = request.files.get("archivo")
+    archivos = request.files.getlist("archivos")
+    errores = validate_avistamiento(nombre_ave, lugar, fecha, hora, archivos)
+    if errores:
+        return render_template("informar_avistamiento.html", errores=errores)
 
-    if validate_avistamiento(nombre_ave, lugar, fecha, hora, archivo):
-        # 1. generate random name for archivo
-        _filename = hashlib.sha256(
-            secure_filename(archivo.filename) # nombre del archivo
-            .encode("utf-8") # encodear a bytes
-            ).hexdigest()
-        _extension = filetype.guess(archivo).extension
-        img_filename = f"{_filename}.{_extension}"
+    user = db.get_voluntario_by_email(username)
+    ave_id = db.get_ave_by_name(nombre_ave)
+    if user is None:
+        session.pop("user", None)
+        return redirect(url_for("iniciar_sesion"))
+    if ave_id is None:
+        return render_template(
+            "informar_avistamiento.html",
+            errores=["El ave seleccionada no existe en la base de datos."],
+        )
 
-        # 2. save img as a file
-        ruta_fisica= (os.path.join(app.config["UPLOAD_FOLDER"], img_filename))
-        archivo.save(ruta_fisica)
-        ruta_archivo = os.path.join("uploads", img_filename).replace("\\", "/")
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    registros = []
+    for archivo in archivos:
+        media_type = filetype.guess(archivo.stream)
+        archivo.stream.seek(0)
+        nombre_archivo = f"{uuid4().hex}.{media_type.extension}"
+        archivo.save(os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo))
+        ruta_archivo = f"uploads/{nombre_archivo}"
+        registros.append((nombre_archivo, ruta_archivo))
 
-
-        # 3. guardar avistamiento en la base de datos
-        user = db.get_voluntario_by_email(username)
-        ave_id = db.get_ave_by_name(nombre_ave)
-        if ave_id is None:
-            error = "El ave seleccionada no existe en la base de datos"
-            return render_template(
-                "informar_avistamiento.html",
-                error=error
-            )
-        db.create_avistamiento(user.id, ave_id, fecha, hora, lugar, img_filename, ruta_archivo)
-        flash("¡Avistamiento enviado!", "success")
-        return redirect(url_for("index"))
-    
-    return render_template("informar_avistamiento.html")
+    db.create_avistamiento(user.id, ave_id, fecha, hora, lugar, registros)
+    flash("¡Avistamiento enviado!", "success")
+    return redirect(url_for("index"))
 
 @app.route("/listado_avistamientos.html", methods=['GET'])
 def listado_avistamientos():
@@ -147,15 +145,17 @@ def detalle_avistamiento(avistamiento_id):
         abort(404)
 
     nombre_ave = db.get_ave_by_id(avistamiento.ave_id)
-    archivo = db.get_ruta_archivo_by_avistamiento_id(avistamiento_id)
-    extension = os.path.splitext(archivo or "")[1].lower()
-    es_video = extension in {".mp4", ".webm", ".mov", ".avi", ".mkv", ".mpeg", ".mpg", ".3gp", ".wmv", ".flv"}
+    archivos = db.get_archivos_by_avistamiento_id(avistamiento_id)
+    for archivo in archivos:
+        extension = os.path.splitext(archivo["ruta_archivo"])[1].lower()
+        archivo["es_video"] = extension in {
+            ".mp4", ".webm", ".mov", ".avi", ".mkv", ".mpeg", ".mpg"
+        }
     return render_template(
         "detalle_avistamiento.html",
         avistamiento=avistamiento,
         nombre_ave=nombre_ave,
-        archivo=archivo,
-        es_video=es_video
+        archivos=archivos
     )
 
 @app.route("/api/avistamientos/<int:avistamiento_id>/comentarios", methods=["GET"])
@@ -163,7 +163,15 @@ def comentarios_avistamiento(avistamiento_id):
     if db.get_avistamiento_by_id(avistamiento_id) is None:
         return jsonify({"error": "El avistamiento no existe."}), 404
 
-    return jsonify(db.get_comentarios_by_avistamiento(avistamiento_id))
+    comentarios = db.get_comentarios_by_avistamiento(avistamiento_id)
+    return jsonify([
+        {
+            "nombre": comentario.nombre,
+            "texto": comentario.texto,
+            "fecha": comentario.fecha.isoformat(),
+        }
+        for comentario in comentarios
+    ])
 
 @app.route("/api/avistamientos/<int:avistamiento_id>/comentarios", methods=["POST"])
 def agregar_comentario(avistamiento_id):

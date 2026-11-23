@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <title>Avistamiento de Aves Chilenas</title>
     <link rel="stylesheet" type="text/css" href="../static/css/index.css">
@@ -45,35 +45,42 @@
         {% if avistamientos %}
         <h3>Últimos avistamientos</h3>
         <div>
-            <table border=1>
-            <tr>
-                <td><b>ID</b></td>
-                <td><b>Lugar</b></td>
-                <td><b>Archivo</b></td>
-            </tr>
-            {% for a in avistamientos %}
-            <tr>
-                <td>{{ a.id }}</td>
-                <td>{{ a.lugar }}</td>
-                <td>
-                    {% if a.archivo %}
-                    <img
-                        src="{{ url_for('static', filename=a.archivo) }}"
-                        alt="Fotografía del avistamiento {{ a.id }}"
-                        width="160"
-                    >
-                    {% else %}
-                    Sin fotografía
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+            <table class="ultimos-avistamientos">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Lugar</th>
+                        <th scope="col">Archivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in avistamientos %}
+                    <tr>
+                        <td>{{ a.id }}</td>
+                        <td>{{ a.lugar }}</td>
+                        <td>
+                            {% if a.archivo %}
+                                {% if a.archivo.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                                <img
+                                    src="{{ url_for('static', filename=a.archivo) }}"
+                                    alt="Fotografía del avistamiento {{ a.id }}"
+                                    width="160"
+                                >
+                                {% else %}
+                                <a href="{{ url_for('static', filename=a.archivo) }}">Ver archivo</a>
+                                {% endif %}
+                            {% else %}
+                            Sin archivos
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
+        </div>
         {% else %}
             <p>No hay avistamientos registrados.</p>
         {% endif %}
-            
-        </div>
         
         <article>
             <h3>Sobre el sitio</h3>

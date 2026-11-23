@@ -14,6 +14,16 @@
             <h2 id="val-msg"></h2>
             <ul id="val-list"></ul>
         </div>
+        {% if errores %}
+        <div class="error-message" role="alert">
+            <p>No se pudo registrar el avistamiento:</p>
+            <ul>
+                {% for error in errores %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <h1>Informar avistamientos</h1>
         
         <form name="myFormAvistamientos" action="/informar_avistamiento.html"  method="post" enctype="multipart/form-data">
@@ -27,7 +37,7 @@
             </select>
     
             <label for="nombre_ave">Nombre del ave</label>
-            <input type="text" name="nombre_ave" id="nombre_ave" minlength="5"><br>
+            <input type="text" name="nombre_ave" id="nombre_ave" minlength="5" required><br>
             <br>
             <label for="lugar">Lugar del avistamiento</label>
             <input type="text" name="lugar" id="lugar" minlength="8" required><br>
@@ -39,7 +49,7 @@
             <input type="time" id="hora" name="hora"><br>
             <br>
             <label for="archivo">Adjuntar archivo:</label>
-            <input type="file" id="archivo" name="archivo" required><br>
+            <input type="file" id="archivo" name="archivos" accept="image/*,video/*" multiple required><br>
             
             <button id="submit-btn" type="submit">Enviar</button>
         </form>

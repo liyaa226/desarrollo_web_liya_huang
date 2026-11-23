@@ -40,6 +40,8 @@ function renderTable() {
        const extension = c.archivo.split('.').pop().toLowerCase();
        if (['png', 'jpg', 'jpeg', 'gif'].includes(extension)) {
          foto = `<img class="miniatura-avistamiento" src="${staticUrl}${c.archivo}" alt="Foto del avistamiento ${c.id}">`;
+       } else if (['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'].includes(extension)) {
+         foto = `<a href="${staticUrl}${c.archivo}">Ver video</a>`;
        }
      }
 

@@ -189,56 +189,56 @@ def get_avistamiento_by_id(id):
     session.close()
     return avistamientos
 
-def get_ruta_archivo_by_avistamiento_id(avistamiento_id):
+def get_archivos_by_avistamiento_id(avistamiento_id):
     session = SessionLocal()
     try:
         resultado = session.execute(
             text("""
-                SELECT ruta_archivo
+                SELECT nombre_archivo, ruta_archivo
                 FROM registro
                 WHERE avistamiento_id = :avistamiento_id
-                ORDER BY id DESC
-                LIMIT 1
+                ORDER BY id
             """),
             {"avistamiento_id": avistamiento_id}
-        ).fetchone()
-        return resultado[0] if resultado else None
+        ).fetchall()
+        return [
+            {"nombre_archivo": row.nombre_archivo, "ruta_archivo": row.ruta_archivo}
+            for row in resultado
+        ]
     finally:
         session.close()
 
 
-def create_avistamiento(voluntario_id ,ave_id, fecha, hora, lugar, nombre_archivo, ruta_archivo):
+def create_avistamiento(voluntario_id, ave_id, fecha, hora, lugar, registros):
     session = SessionLocal()
+    try:
+        hora_objeto = datetime.strptime(hora, "%H:%M").time() if hora else datetime.now().time()
+        fecha_objeto = datetime.strptime(fecha, "%Y-%m-%d").date()
+        fecha_hora = datetime.combine(fecha_objeto, hora_objeto)
 
-    # Hora es opcional
-    if hora:
-        hora_objeto = datetime.strptime(hora, "%H:%M").time()
-    else:
-        hora_objeto = datetime.now().time()
-
-    fecha_objeto = datetime.strptime(fecha, "%Y-%m-%d").date()
-
-    fecha_hora = datetime.combine(fecha_objeto,hora_objeto)
-
-    new_avistamiento = Avistamiento(
-        voluntario_id=voluntario_id,
-        ave_id=ave_id,
-        fecha_hora= fecha_hora,
-        lugar=lugar, 
-        descripcion=None
-    )
-    session.add(new_avistamiento)
-    #genere el ID del avistamiento sin cerrar la transacción todavía
-    session.flush()
-    
-    nuevo_registro = Registro(
-            nombre_archivo=nombre_archivo,
-            ruta_archivo=ruta_archivo,
-            avistamiento_id=new_avistamiento.id
+        nuevo_avistamiento = Avistamiento(
+            voluntario_id=voluntario_id,
+            ave_id=ave_id,
+            fecha_hora=fecha_hora,
+            lugar=lugar,
+            descripcion=None
         )
-    session.add(nuevo_registro)
-    session.commit()
-    session.close()
+        session.add(nuevo_avistamiento)
+        session.flush()
+
+        for nombre_archivo, ruta_archivo in registros:
+            session.add(Registro(
+                nombre_archivo=nombre_archivo,
+                ruta_archivo=ruta_archivo,
+                avistamiento_id=nuevo_avistamiento.id
+            ))
+
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 def get_ave_by_id(ave_id):
@@ -282,11 +282,29 @@ def get_comuna_by_name(name):
     finally:
         session.close()
 
+def get_comuna_id_by_name_and_region(comuna, region):
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text("""
+                SELECT comuna.id
+                FROM comuna
+                INNER JOIN region ON comuna.region_id = region.id
+                WHERE comuna.nombre = :comuna AND region.nombre = :region
+            """),
+            {"comuna": comuna, "region": region}
+        ).fetchone()
+        return resultado[0] if resultado else None
+    finally:
+        session.close()
+
 
 def register_user(nombre, email, phone, region, comuna):
     if get_voluntario_by_email(email) is not None:
         return False, "El correo ya esta en uso."
-    comuna_id= get_comuna_by_name(comuna)
+    comuna_id = get_comuna_id_by_name_and_region(comuna, region)
+    if comuna_id is None:
+        return False, "La comuna seleccionada no pertenece a la región indicada."
     create_voluntario(nombre, email, comuna_id , phone)
     return True, None
 

@@ -48,6 +48,7 @@ label {
 
 input[type="email"],
 input[type="nombre"],
+input[type="tel"],
 input[type="text"],
 input[type="file"],
 select {
@@ -221,6 +222,14 @@ label:has(+ select:required)::after {
     max-height: 360px;
     margin: 16px 0;
     border-radius: 6px;
+}
+
+.error-message {
+    padding: 10px 14px;
+    color: #a94442;
+    background-color: #ffdddd;
+    border-left: 6px solid #f44336;
+    border-radius: 4px;
 }
 
 .detalle-container li {
