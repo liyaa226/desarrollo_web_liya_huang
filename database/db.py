@@ -151,6 +151,38 @@ def get_avistamientos():
     finally:
         session.close()
 
+def buscar_avistamientos(termino):
+    session = SessionLocal()
+    try:
+        filas = session.execute(
+            text("""
+                SELECT voluntario.nombre AS voluntario,
+                       DATE(avistamiento.fecha_hora) AS fecha,
+                       ave.nombre AS ave,
+                       comuna.nombre AS comuna
+                FROM avistamiento
+                INNER JOIN voluntario ON avistamiento.voluntario_id = voluntario.id
+                INNER JOIN ave ON avistamiento.ave_id = ave.id
+                INNER JOIN comuna ON voluntario.comuna_id = comuna.id
+                WHERE LOCATE(:termino, ave.nombre) > 0
+                   OR LOCATE(:termino, voluntario.nombre) > 0
+                   OR LOCATE(:termino, comuna.nombre) > 0
+                ORDER BY avistamiento.fecha_hora DESC
+            """),
+            {"termino": termino}
+        ).fetchall()
+        return [
+            {
+                "voluntario": fila.voluntario,
+                "fecha": fila.fecha.isoformat() if fila.fecha else "",
+                "ave": fila.ave,
+                "comuna": fila.comuna,
+            }
+            for fila in filas
+        ]
+    finally:
+        session.close()
+
 
 
 def get_ultimos_avistamientos(page_size):

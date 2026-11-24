@@ -142,6 +142,17 @@ def listado_avistamientos():
 
     return render_template("listado_avistamientos.html", avistamientos=avistamientos)
 
+@app.route("/buscador_avistamientos.html", methods=["GET"])
+def buscador_avistamientos():
+    return render_template("buscador_avistamientos.html")
+
+@app.route("/api/avistamientos/buscar", methods=["GET"])
+def buscar_avistamientos():
+    termino = request.args.get("q", "").strip()
+    if not termino:
+        return jsonify([])
+    return jsonify(db.buscar_avistamientos(termino))
+
 @app.route("/avistamientos/<int:avistamiento_id>", methods=["GET"])
 def detalle_avistamiento(avistamiento_id):
     avistamiento = db.get_avistamiento_by_id(avistamiento_id)
