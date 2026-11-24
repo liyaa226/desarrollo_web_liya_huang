@@ -32,3 +32,29 @@
     background: #fff09a;
     font-weight: bold;
 }
+
+.resultado-nota {
+    display: inline-block;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.evaluacion-avistamiento {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.evaluacion-avistamiento[hidden] {
+    display: none;
+}
+
+.evaluacion-avistamiento select {
+    width: auto;
+    margin: 0;
+}
+
+.estado-evaluacion {
+    margin: 4px 0 0;
+}

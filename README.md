@@ -1,6 +1,6 @@
 # desarrollo_web_liya_huang
 
-
+Las notas del avistamientos se ven tanto desde el Buscador de avistamientos como en el Listado de avistamientos
 
 Usé Java versión 27 con Spring Boot 4.2.0 y las dependencias recomendadas por el auxiliar.
 
@@ -24,3 +24,5 @@ Inicia Flask en otra terminal. El listado consulta los promedios en
 `/api/avistamientos/{id}/notas`. 
 
 La página responden en el puerto 5000, es decir en http://127.0.0.1:5000/ 
+
+

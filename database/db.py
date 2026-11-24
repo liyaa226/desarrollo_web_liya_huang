@@ -156,7 +156,8 @@ def buscar_avistamientos(termino):
     try:
         filas = session.execute(
             text("""
-                SELECT voluntario.nombre AS voluntario,
+                SELECT avistamiento.id AS id,
+                       voluntario.nombre AS voluntario,
                        DATE(avistamiento.fecha_hora) AS fecha,
                        ave.nombre AS ave,
                        comuna.nombre AS comuna
@@ -173,6 +174,7 @@ def buscar_avistamientos(termino):
         ).fetchall()
         return [
             {
+                "id": fila.id,
                 "voluntario": fila.voluntario,
                 "fecha": fila.fecha.isoformat() if fila.fecha else "",
                 "ave": fila.ave,
