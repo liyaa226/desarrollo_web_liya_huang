@@ -17,6 +17,10 @@ app = Flask(__name__)
 
 app.secret_key = "s3cr3t_k3y"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config["NOTAS_API_URL"] = os.environ.get(
+    "NOTAS_API_URL",
+    "http://localhost:8080/api/avistamientos/notas",
+)
 # app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
 
 # --- Auth Routes ---

@@ -6,7 +6,11 @@
 </head>
 <body class="informar-page">
 
-    <main class="main-containe" data-static-url="{{ url_for('static', filename='') }}">
+    <main
+        class="main-containe"
+        data-static-url="{{ url_for('static', filename='') }}"
+        data-notas-url="{{ config['NOTAS_API_URL'] }}"
+    >
         <h1>Avistamientos de Aves</h1>
 
         <section class="filtros">
@@ -39,13 +43,16 @@
                     <th data-sort="fecha">Fecha</th>
                     <th data-sort="lugar">Lugar</th>
                     <th>Archivo</th>
+                    <th>Nota promedio</th>
+                    <th>Evaluar</th>
                     <th>Detalle</th>
                 </tr>
             </thead>
             <tbody>
-                <tr><td colspan="5"><i>Loading...</i></td></tr>
+                <tr><td colspan="7"><i>Loading...</i></td></tr>
             </tbody>
         </table>
+        <p id="estado-notas" role="status" aria-live="polite"></p>
 
         <button id="prevButton">Anterior</button> 
         <button id="nextButton">Siguiente</button> 
