@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Buscador de avistamientos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buscador.css') }}">
+</head>
+<body class="informar-page">
+    <main class="main-container buscador-container"
+          data-notas-url="{{ config['NOTAS_API_URL'] }}">
+        <h1>Buscador de avistamientos</h1>
+        <form id="form-busqueda" role="search">
+            <label for="termino">Busca por ave, voluntario o comuna</label>
+            <input id="termino" name="q" type="text" autocomplete="off" aria-describedby="ayuda-busqueda">
+            <small id="ayuda-busqueda">Los resultados se actualizan mientras escribes.</small>
+        </form>
+        <p id="estado-busqueda" role="status" aria-live="polite"></p>
+        <ul id="resultados-busqueda" aria-label="Resultados de avistamientos"></ul>
+        <p><a href="{{ url_for('index') }}">Volver a la portada</a></p>
+    </main>
+    <script src="{{ url_for('static', filename='js/buscador_avistamientos.js') }}"></script>
+</body>
+</html>

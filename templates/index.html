@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Avistamiento de Aves Chilenas</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/index.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Inicio</h1>
+            <h2>Te damos la bienvenida</h2>
+
+        {% if session.get('user') %}
+        
+            <form id="btn-logout" action="{{ url_for('logout') }}" method="get">
+                <button type="submit">Cerrar sesión</button>
+            </form>
+        
+        {% endif %}
+
+        <ul>     
+            <li>
+                <a href="registro_voluntario.html">Registro de voluntario(a)</a>
+            </li>
+            <li>
+                <a href="informar_avistamiento.html">Informar avistamiento</a>
+            </li>
+            <li>
+                <a href="listado_avistamientos.html">Listado de avistamientos</a>
+            </li>    
+            <li>
+                <a href="{{ url_for('buscador_avistamientos') }}">Buscador de avistamientos</a>
+            </li>
+            <li>
+                <a href="estadisticas.html">Estadísticas</a>
+            </li>
+        </ul>
+    </header>
+
+    <main>
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in mensajes %}
+            <p class="mensaje-flash {{ categoria }}" role="status">{{ mensaje }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        {% if avistamientos %}
+        <h3>Últimos avistamientos</h3>
+        <div>
+            <table class="ultimos-avistamientos">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Lugar</th>
+                        <th scope="col">Archivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in avistamientos %}
+                    <tr>
+                        <td>{{ a.id }}</td>
+                        <td>{{ a.lugar }}</td>
+                        <td>
+                            {% if a.archivo %}
+                                {% if a.archivo.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                                <img
+                                    src="{{ url_for('static', filename=a.archivo) }}"
+                                    alt="Fotografía del avistamiento {{ a.id }}"
+                                    width="160"
+                                >
+                                {% else %}
+                                <a href="{{ url_for('static', filename=a.archivo) }}">Ver archivo</a>
+                                {% endif %}
+                            {% else %}
+                            Sin archivos
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p>No hay avistamientos registrados.</p>
+        {% endif %}
+        
+        <article>
+            <h3>Sobre el sitio</h3>
+            <p>En la Unión de Ornitólogos de Chile existe una creciente preocupación por mantener
+actualizado el registro de avistamientos de aves en Chile, en particular les preocupa que con
+los fenómenos del clima se estén produciendo cambios bruscos en la población de aves.
+Así que se desarrolló un sistema que permita gestionar avistamientos
+de aves reportados por personas voluntarias. </p>
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Avistamiento de Aves Chilenas</p>
+    </footer>
+
+</body>
+</html>

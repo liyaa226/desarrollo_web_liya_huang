@@ -1,0 +1,422 @@
+from sqlalchemy import create_engine, Column, Integer, BigInteger, String, ForeignKey, DateTime, text
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship
+from datetime import datetime
+
+
+
+#nombre de la base de datos
+DB_NAME = "tarea2"
+DB_USERNAME = "cc5002"
+DB_PASSWORD = "programacionweb"
+DB_HOST = "localhost"
+DB_PORT = 3306
+
+DATABASE_URL = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+engine = create_engine(DATABASE_URL, echo=False, future=True)
+SessionLocal = sessionmaker(bind=engine)
+
+Base = declarative_base()
+
+# --- Models ---
+
+class Voluntario(Base):
+    __tablename__ = 'voluntario'
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    nombre = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False)
+    telefono = Column(String(255), nullable=True)
+    fecha_registro = Column(DateTime, nullable=False, default=datetime.now)
+    comuna_id = Column(Integer, nullable=False)
+
+    avistamientos = relationship("Avistamiento", back_populates="voluntarios")
+
+class Avistamiento(Base):
+    __tablename__ = 'avistamiento'
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    voluntario_id = Column(ForeignKey('voluntario.id'), nullable=False)
+    ave_id = Column(Integer, nullable=False)
+    #si no se registra la hora de avistamiento, se usa la hora actual por defecto para guardarla en la base de datos 
+    fecha_hora = Column(DateTime, nullable=False, default=datetime.now) 
+    lugar = Column(String(200), nullable=True)
+    descripcion = Column(String(500), nullable=True)
+
+    voluntarios = relationship("Voluntario", back_populates="avistamientos")
+    registros = relationship("Registro", back_populates="avistamientos")
+
+class Registro(Base):
+    __tablename__ = 'registro'
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    ruta_archivo = Column(String(300), nullable=False)
+    nombre_archivo = Column(String(300), nullable=False)
+    avistamiento_id = Column(ForeignKey('avistamiento.id'), nullable=False)
+
+    avistamientos = relationship("Avistamiento", back_populates="registros")
+
+class Comentario(Base):
+    __tablename__ = 'comentario'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(80), nullable=False)
+    texto = Column(String(300), nullable=False)
+    fecha = Column(DateTime, nullable=False, default=datetime.now)
+    avistamiento_id = Column(ForeignKey('avistamiento.id'), nullable=False)
+
+# --- Database Functions ---
+
+def get_voluntario_by_id(id):
+    session = SessionLocal()
+    voluntario = session.query(Voluntario).filter_by(id=id).first()
+    session.close()
+    return voluntario
+
+def get_voluntario_by_nombre(nombre):
+    session = SessionLocal()
+    voluntario = session.query(Voluntario).filter_by(nombre=nombre).first()
+    session.close()
+    return voluntario
+
+def get_voluntario_by_email(email):
+    session = SessionLocal()
+    voluntario = session.query(Voluntario).filter_by(email=email).first()
+    session.close()
+    return voluntario
+
+def get_voluntario_by_telefono(telefono):
+    session = SessionLocal()
+    voluntario = session.query(Voluntario).filter_by(telefono=telefono).first()
+    session.close()
+    return voluntario
+
+
+def get_voluntarios_by_comuna(comuna_id):
+    session = SessionLocal()
+    voluntarios = session.query(Voluntario).filter_by(comuna_id=comuna_id).all()
+    session.close()
+    return voluntarios
+
+
+
+def create_voluntario(nombre, email, comuna_id, telefono):
+    session = SessionLocal()
+    
+    # Usamos la fecha y hora exacta de este momento
+    fecha_registro = datetime.now()
+        
+    new_voluntario = Voluntario(
+        nombre=nombre, 
+        email=email, 
+        telefono=telefono, 
+        comuna_id=comuna_id
+    )
+    #SQLAlchemy pondrá automáticamente la fecha_hora cuando cree el voluntario.
+    session.add(new_voluntario)
+    session.commit()
+    session.close()
+    
+
+def get_avistamientos():
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text(""" SELECT a.id, av.nombre AS ave,
+                    DATE(a.fecha_hora) AS fecha, a.lugar,
+                    (
+                        SELECT r.ruta_archivo
+                        FROM registro AS r
+                        WHERE r.avistamiento_id = a.id
+                        ORDER BY r.id DESC
+                        LIMIT 1
+                    ) AS archivo
+                FROM avistamiento a
+                INNER JOIN ave av ON a.ave_id = av.id
+                ORDER BY a.fecha_hora DESC
+            """)
+        ).fetchall()
+
+        return [
+            {
+                "id": row.id,
+                "ave": row.ave,
+                "fecha": str(row.fecha),
+                "lugar": row.lugar,
+                "archivo": row.archivo
+            }
+            for row in resultado
+        ]
+
+    finally:
+        session.close()
+
+def buscar_avistamientos(termino):
+    session = SessionLocal()
+    try:
+        filas = session.execute(
+            text("""
+                SELECT avistamiento.id AS id,
+                       voluntario.nombre AS voluntario,
+                       DATE(avistamiento.fecha_hora) AS fecha,
+                       ave.nombre AS ave,
+                       comuna.nombre AS comuna
+                FROM avistamiento
+                INNER JOIN voluntario ON avistamiento.voluntario_id = voluntario.id
+                INNER JOIN ave ON avistamiento.ave_id = ave.id
+                INNER JOIN comuna ON voluntario.comuna_id = comuna.id
+                WHERE LOCATE(:termino, ave.nombre) > 0
+                   OR LOCATE(:termino, voluntario.nombre) > 0
+                   OR LOCATE(:termino, comuna.nombre) > 0
+                ORDER BY avistamiento.fecha_hora DESC
+            """),
+            {"termino": termino}
+        ).fetchall()
+        return [
+            {
+                "id": fila.id,
+                "voluntario": fila.voluntario,
+                "fecha": fila.fecha.isoformat() if fila.fecha else "",
+                "ave": fila.ave,
+                "comuna": fila.comuna,
+            }
+            for fila in filas
+        ]
+    finally:
+        session.close()
+
+
+
+def get_ultimos_avistamientos(page_size):
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text("""
+                SELECT a.id, a.lugar, (
+                    SELECT r.ruta_archivo
+                    FROM registro AS r
+                    WHERE r.avistamiento_id = a.id
+                    ORDER BY r.id DESC
+                    LIMIT 1
+                ) AS archivo
+                FROM avistamiento AS a
+                ORDER BY a.fecha_hora DESC
+                LIMIT :page_size
+            """),
+            {"page_size": page_size}
+        ).fetchall()
+
+        return [
+            {
+                "id": row.id,
+                "lugar": row.lugar,
+                "archivo": row.archivo
+            }
+            for row in resultado
+        ]
+    finally:
+        session.close()
+
+def get_avistamiento_by_id(id):
+    session = SessionLocal()
+    avistamientos = session.query(Avistamiento).filter_by(id=id).first()
+    session.close()
+    return avistamientos
+
+def get_archivos_by_avistamiento_id(avistamiento_id):
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text("""
+                SELECT nombre_archivo, ruta_archivo
+                FROM registro
+                WHERE avistamiento_id = :avistamiento_id
+                ORDER BY id
+            """),
+            {"avistamiento_id": avistamiento_id}
+        ).fetchall()
+        return [
+            {"nombre_archivo": row.nombre_archivo, "ruta_archivo": row.ruta_archivo}
+            for row in resultado
+        ]
+    finally:
+        session.close()
+
+
+def create_avistamiento(voluntario_id, ave_id, fecha, hora, lugar, registros):
+    session = SessionLocal()
+    try:
+        hora_objeto = datetime.strptime(hora, "%H:%M").time() if hora else datetime.now().time()
+        fecha_objeto = datetime.strptime(fecha, "%Y-%m-%d").date()
+        fecha_hora = datetime.combine(fecha_objeto, hora_objeto)
+
+        nuevo_avistamiento = Avistamiento(
+            voluntario_id=voluntario_id,
+            ave_id=ave_id,
+            fecha_hora=fecha_hora,
+            lugar=lugar,
+            descripcion=None
+        )
+        session.add(nuevo_avistamiento)
+        session.flush()
+
+        for nombre_archivo, ruta_archivo in registros:
+            session.add(Registro(
+                nombre_archivo=nombre_archivo,
+                ruta_archivo=ruta_archivo,
+                avistamiento_id=nuevo_avistamiento.id
+            ))
+
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
+def get_ave_by_id(ave_id):
+    session = SessionLocal()
+
+    try:
+        resultado = session.execute(
+            text(""" SELECT nombre FROM ave WHERE id = :id"""),
+            {"id": ave_id}
+        ).fetchone()
+        return resultado[0] if resultado else None
+
+    finally:
+        session.close()
+
+def get_ave_by_name(nombre):
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text(""" SELECT id FROM ave WHERE LOWER(TRIM(nombre)) = LOWER(TRIM(:nombre))"""),
+            {"nombre": nombre.strip()}
+        ).fetchone()
+        return resultado[0] if resultado else None
+
+    finally:
+        session.close()
+
+def get_comuna_by_name(name):
+    session = SessionLocal()
+
+    try:
+        result = session.execute(
+            text("SELECT id FROM comuna WHERE nombre = :nombre"),
+            {"nombre": name}).fetchone()
+
+        if result is None:
+            return None
+        else:
+            return result[0]
+
+    finally:
+        session.close()
+
+def get_comuna_id_by_name_and_region(comuna, region):
+    session = SessionLocal()
+    try:
+        resultado = session.execute(
+            text("""
+                SELECT comuna.id
+                FROM comuna
+                INNER JOIN region ON comuna.region_id = region.id
+                WHERE comuna.nombre = :comuna AND region.nombre = :region
+            """),
+            {"comuna": comuna, "region": region}
+        ).fetchone()
+        return resultado[0] if resultado else None
+    finally:
+        session.close()
+
+
+def register_user(nombre, email, phone, region, comuna):
+    if get_voluntario_by_email(email) is not None:
+        return False, "El correo ya esta en uso."
+    comuna_id = get_comuna_id_by_name_and_region(comuna, region)
+    if comuna_id is None:
+        return False, "La comuna seleccionada no pertenece a la región indicada."
+    create_voluntario(nombre, email, comuna_id , phone)
+    return True, None
+
+def login_user(email):
+    email_registrado = get_voluntario_by_email(email)
+    if email_registrado is None:
+        return False, "Estás iniciando sesión con un correo diferente al que te registraste"
+
+    return True, None
+
+
+def get_estadisticas():
+    session = SessionLocal()
+    try:
+        por_dia = session.execute(
+            text("""
+                SELECT DATE(fecha_hora) AS fecha, COUNT(*) AS cantidad
+                FROM avistamiento
+                GROUP BY DATE(fecha_hora)
+                ORDER BY fecha
+            """)
+        ).fetchall()
+
+        por_ave = session.execute(
+            text("""
+                SELECT ave.nombre AS ave, COUNT(*) AS cantidad
+                FROM avistamiento
+                INNER JOIN ave ON avistamiento.ave_id = ave.id
+                GROUP BY ave.id, ave.nombre
+                ORDER BY cantidad DESC, ave.nombre
+            """)
+        ).fetchall()
+
+        voluntarios_por_comuna = session.execute(
+            text("""
+                SELECT comuna.nombre AS comuna, COUNT(*) AS cantidad
+                FROM voluntario
+                INNER JOIN comuna ON voluntario.comuna_id = comuna.id
+                GROUP BY comuna.id, comuna.nombre
+                ORDER BY comuna.nombre
+            """)
+        ).fetchall()
+
+        return {
+            "avistamientos_por_dia": [
+                {"fecha": str(row.fecha), "cantidad": row.cantidad}
+                for row in por_dia
+            ],
+            "avistamientos_por_ave": [
+                {"ave": row.ave, "cantidad": row.cantidad}
+                for row in por_ave
+            ],
+            "voluntarios_por_comuna": [
+                {"comuna": row.comuna, "cantidad": row.cantidad}
+                for row in voluntarios_por_comuna
+            ],
+        }
+    finally:
+        session.close()
+
+def get_comentarios_by_avistamiento(avistamiento_id):
+    session = SessionLocal()
+    comentarios = session.query(Comentario).filter_by(avistamiento_id=avistamiento_id).all()
+    session.close()
+    return comentarios    
+
+def create_comentario(avistamiento_id, nombre, texto):
+    session = SessionLocal()
+    try:
+        new_comentario = Comentario(
+            avistamiento_id=avistamiento_id,
+            nombre=nombre,
+            texto=texto
+        )
+        session.add(new_comentario)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
